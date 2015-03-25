@@ -2,22 +2,19 @@
 var serverAddress = '127.0.1.1' ;
 var socket = null;
 var shareVideo = null;
-var localVideo = null;
-var remoteVideo = null;
 var shareStream = null;
 var videoStream = null;
 var shareFlowing = false;
 var videoFlowing = false;
 var isPresentor = false;
 var shareVideoActive = false;
-var remoteVideoActive = false;
 var removeVP8Codec = false;
 var joinReceived = false;
 var pending_request_id = null;
 var pconns = {};
 
 var mediaConstraints = {'mandatory': {
-                        'OfferToReceiveAudio':true, 
+                        'OfferToReceiveAudio':false, 
                         'OfferToReceiveVideo':true}};
 
 shareVideo = document.getElementById("shareVideo");
@@ -43,9 +40,6 @@ function gotShareStream(stream) {
 }
 
 function gotAudioVideoStream(stream) {
-  localVideo = document.getElementById("localVideo");
-  remoteVideo = document.getElementById("remoteVideo");  // may move this
-  localVideo.src = URL.createObjectURL(stream);
   videoStream = stream;
   if (isPresentor) {
     connect();
@@ -109,14 +103,7 @@ document.querySelector('#closeConfiguration').addEventListener('click', function
   popup.style.display = "none"; 
   removeVP8Codec = document.getElementById('h264').checked;
 
-  if (document.getElementById('small').checked) {
-    document.getElementById("remoteVideo").className = "video-small";
-  } else if (document.getElementById('medium').checked) {
-    document.getElementById("remoteVideo").className = "video-medium";
-  } else {
-    document.getElementById("remoteVideo").className = "video-large";
-  }
-
+  
   serverAddress = document.getElementById("serverAddress").value;
   serverString = 'ws://' + serverAddress + ':1337';                                                                                                                                                                                       
   socket = new WebSocket(serverString);
@@ -248,7 +235,7 @@ function share() {
 function startVideo() {
     // grab camera and mic
     navigator.webkitGetUserMedia({
-      audio: true,
+      audio: false,
       video: true
     }, gotAudioVideoStream, errorCallback);
 }

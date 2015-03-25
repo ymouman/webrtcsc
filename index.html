@@ -136,7 +136,6 @@
 </head>
 <body>
 
-  <h2 id="mainTitleH2"><a href="http://localhost:1337/packaged_app">Check here if you're the Presenter </a></h2>
   <h2 id="mainTitleH2">WebRTC Share, attendee console</h2>
   <div class="share-video-section">
     <h3 id="remoteIDH3"> Remote Share </h3>
@@ -149,19 +148,7 @@
     <video class="video-win1" id="shareVideo" autoplay controls></video>
     <div class="video-section">
       <table>
-        <tr class="table-header">
-          <td>Local Video</td>
-          <td>Remote Video</td>
-        </tr>
-        <tr>
-          <td><video class="video-win2" id="localVideo" autoplay></video></td>
-          <td><video class="video-win2" id="remoteVideo" autoplay></video></td>
-        </tr>
         <tr class="table-buttons">
-          <td>
-            <button class="myButton" type="button" onclick="startMedia();">Start Media</button>
-            <button class="myButton" type="button" onclick="stopMedia();">Stop Media</button>
-          </td>
           <td>
             <button class="myButton" type="button" onclick="pause();">Pause</button>
             <button class="myButton" type="button" onclick="play();">Play</button>
@@ -180,17 +167,15 @@
 
   var shareVideo = document.getElementById('shareVideo');
   var shareVideoActive = false;
-  var remoteVideo = document.getElementById('remoteVideo');
-  var remoteVideoActive = false;
-  var localvid = document.getElementById('localVideo');
   var localStream = null;
   var shuttingDown = false;
   var mediaFlowing = false;
   var removeVP8Codec = document.getElementById('h264').checked;
   var pconns = {};
   var mediaConstraints = {'mandatory': {
-                          'OfferToReceiveAudio':true, 
+                          'OfferToReceiveAudio':false, 
                           'OfferToReceiveVideo':true}};
+
 
   function handleRadioClick(myRadio) {
     if (myRadio.value == 'h264') {
@@ -207,31 +192,11 @@
   function startMedia() {
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || window.navigator.mozGetUserMedia || navigator.msGetUserMedia;
     window.URL = window.URL || window.webkitURL;
-    navigator.getUserMedia({video: true, audio: true}, successCallback, errorCallback);
-  }
-
-  function stopMedia() {
-    if (localvid.mozSrcObject) {
-      localvid.mozSrcObject.stop();
-      localvid.src = null;
-    } else {
-      localvid.src = "";
-      if (localStream)
-        localStream.stop();
-    }
-
-    if (mediaFlowing && !shuttingDown) {
-      if(pconns[1]) {
-        pconns[1].removeStream(localStream);
-        pconns[1].createOffer(setLocalDescAndSendMessagePC1Offer, errorCallback, mediaConstraints);
-      }
-    }
-    localStream = null;
+    navigator.getUserMedia({video: true, audio: false}, successCallback, errorCallback);
   }
 
   function successCallback(stream) {
     localStream = stream;
-    playLocalvideo();
 
     if (mediaFlowing) {
       if (pconns[1]) {
@@ -242,22 +207,6 @@
     }
   }
 
-  function playLocalvideo() {
-    if (localStream) {
-      if (localvid.mozSrcObject) {
-        localvid.mozSrcObject = localStream;
-        localvid.play();
-      } else {
-        try {
-          localvid.src = window.URL.createObjectURL(localStream);
-          localvid.play();
-        } catch(e) {
-          console.log("Error setting video src: ", e); 
-        }   
-      }
-    }   
-  }
-
   function errorCallback(error) {
     console.error('An error occurred: [CODE ' + error.code + ']');
     return;
@@ -265,12 +214,10 @@
 
   function pause() {
     shareVideo.pause();
-    remoteVideo.pause();
   }
 
   function play() {
     shareVideo.play();
-    remoteVideo.play();
   }
 
   // stop the connection on button click 
@@ -287,7 +234,7 @@
   function stop() {
     console.log("stop()");    
 
-    stopMedia();
+    //stopMedia();
 
     if (pconns[0] != null ) {
       pconns[0].close();
@@ -298,11 +245,9 @@
       pconns[1] = null;
     }
     shareVideo.src = ""; 
-    remoteVideo.src = ""; 
-    localvid.src = "";
     mediaFlowing = false;        
     shareVideoActive = false;
-    remoteVideoActive = false;
+
   }
 
   // If you want to use H.264 then remove other stuff form the SDP
@@ -496,20 +441,11 @@
         shareVideoActive = true;
         return;
       }
-
-      if (!remoteVideoActive) {
-        remoteVideo.src = window.URL.createObjectURL(event.stream);
-        remoteVideo.play();
-        remoteVideoActive = true;
-        if (localStream) 
-         playLocalvideo(); 
-      }
     }
 
     function onRemoteStreamRemoved(event) {
       console.log("Remove remote stream");
       shareVideo.src = "";
-      remoteVideo.src = "";
     }
   }
   </script>

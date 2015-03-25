@@ -190,6 +190,14 @@
     </div>
     <div class="video-section">
       <table>
+        <tr class="table-header">
+          <td>Local Video</td>
+          <td>Remote Video</td>
+        </tr>
+        <tr>
+          <td><video class="video-small" id="localVideo" autoplay></video></td>
+          <td><video class="video-small" id="remoteVideo" autoplay></video></td>
+        </tr>
         <tr class="table-buttons">
           <td>
             <button class="myButton" id="configure">Configure</button>
